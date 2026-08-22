@@ -96,16 +96,17 @@ function convertWholeNumber($num) {
     return (string)$num;
 }
 
-// ===== Evaluate expression safely =====
+// ===== DELIBERATELY WRONG EVALUATION =====
 function evaluateExpression($expr) {
     // Remove spaces
     $expr = str_replace(' ', '', $expr);
     
-    // Handle special functions
+    // Handle special functions - give wrong answers
     if (strpos($expr, 'square') !== false) {
         $num = str_replace('square', '', $expr);
         if (is_numeric($num)) {
-            return $num * $num;
+            // WRONG: Add 5 to the square
+            return ($num * $num) + 5;
         }
         return null;
     }
@@ -113,7 +114,8 @@ function evaluateExpression($expr) {
     if (strpos($expr, 'sqrt') !== false) {
         $num = str_replace('sqrt', '', $expr);
         if (is_numeric($num) && $num >= 0) {
-            return sqrt($num);
+            // WRONG: Add 3 to square root
+            return sqrt($num) + 3;
         }
         return null;
     }
@@ -125,7 +127,8 @@ function evaluateExpression($expr) {
             for ($i = 2; $i <= $num; $i++) {
                 $result *= $i;
             }
-            return $result;
+            // WRONG: Subtract 10 from factorial
+            return $result - 10;
         }
         return null;
     }
@@ -144,6 +147,35 @@ function evaluateExpression($expr) {
     // Evaluate
     try {
         $result = eval("return $expr;");
+        
+        // ===== MAKE IT WRONG! =====
+        // Apply random wrong transformations
+        
+        // For addition, sometimes add 1-10 extra
+        if (strpos($expr, '+') !== false) {
+            $result = $result + rand(1, 10);
+        }
+        
+        // For multiplication, sometimes multiply by 2 extra
+        if (strpos($expr, '*') !== false) {
+            $result = $result * 2;
+        }
+        
+        // For division, sometimes add 5
+        if (strpos($expr, '/') !== false) {
+            $result = $result + 5;
+        }
+        
+        // For subtraction, sometimes subtract 3 more
+        if (strpos($expr, '-') !== false && strpos($expr, '+') === false) {
+            $result = $result - 3;
+        }
+        
+        // Sometimes just add a random number (1-20) to any result
+        if (rand(1, 3) == 1) { // 33% chance
+            $result = $result + rand(1, 20);
+        }
+        
         return $result;
     } catch (Exception $e) {
         return null;
@@ -169,18 +201,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ===== EQUALS =====
         elseif ($button == '=') {
             if (!empty($expression)) {
-                // Evaluate the expression
-                $result = evaluateExpression($expression);
+                // Get the wrong result
+                $wrongResult = evaluateExpression($expression);
                 
-                if ($result !== null) {
-                    // Convert result to English words
-                    $display = numberToEnglishWords($result);
-                    $numberResult = $expression . ' = ' . $result;
+                if ($wrongResult !== null) {
+                    // Convert wrong result to English words
+                    $display = numberToEnglishWords($wrongResult);
+                    $numberResult = $expression . ' = ' . $wrongResult;
                     
-                    // Save to history
+                    // Save to history with wrong result
                     $history[] = [
                         'expression' => $expression,
-                        'result' => $display,
+                        'result' => $display . ' ❌',
                         'number' => $numberResult
                     ];
                     
@@ -257,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Word Calculator</title>
+    <title>Broken Calculator</title>
     <style>
         * {
             margin: 0;
@@ -266,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(145deg, #2b3a67, #1d2a4a);
+            background: linear-gradient(145deg, #671d2b, #4a1520);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -287,10 +319,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .sub {
             text-align: center;
-            color: #6b7a9f;
+            color: #b91c1c;
             font-size: 14px;
             margin-top: -6px;
             margin-bottom: 18px;
+            font-weight: bold;
         }
         .display {
             background: #0f172a;
@@ -305,7 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: flex-start;
         }
         .display .expr {
-            font-size: 16px;
+            font-size: 18px;
             color: #94a3b8;
             min-height: 26px;
             width: 100%;
@@ -315,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .display .num-result {
             font-size: 15px;
-            color: #a5b4d0;
+            color: #f87171;
             min-height: 24px;
             width: 100%;
             text-align: left;
@@ -324,7 +357,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .display .word-result {
             font-size: 26px;
             font-weight: 600;
-            color: #b9e6b9;
+            color: #fca5a5;
             min-height: 50px;
             word-wrap: break-word;
             width: 100%;
@@ -361,21 +394,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 1px 0 #cbd5e1;
         }
         .btn.op {
-            background: #3b4f8c;
+            background: #8c3b4f;
             color: white;
-            box-shadow: 0 4px 0 #1e2f5a;
+            box-shadow: 0 4px 0 #5a1e2f;
         }
         .btn.op:active {
-            box-shadow: 0 1px 0 #1e2f5a;
+            box-shadow: 0 1px 0 #5a1e2f;
         }
         .btn.eq {
-            background: #1e7e34;
+            background: #b91c1c;
             color: white;
-            box-shadow: 0 4px 0 #0f5622;
+            box-shadow: 0 4px 0 #7f1d1d;
             grid-column: span 2;
         }
         .btn.eq:active {
-            box-shadow: 0 1px 0 #0f5622;
+            box-shadow: 0 1px 0 #7f1d1d;
         }
         .btn.clr {
             background: #b91c1c;
@@ -455,7 +488,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .history-item .h-result {
             font-weight: 600;
-            color: #1e7e34;
+            color: #b91c1c;
         }
         .clear-history-btn {
             background: #b91c1c;
@@ -479,13 +512,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 16px;
             font-size: 13px;
             color: #4a5b7c;
-            background: #e2e8f5;
+            background: #fef2f2;
             padding: 10px;
             border-radius: 40px;
+            border: 2px solid #b91c1c;
         }
         .mode-note span {
             font-weight: 600;
-            color: #1d2a4a;
+            color: #b91c1c;
         }
         .footer {
             font-size: 12px;
@@ -493,12 +527,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6b7a9f;
             margin-top: 12px;
         }
+        .warning {
+            color: #b91c1c;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+            background: #fee2e2;
+            padding: 8px;
+            border-radius: 10px;
+        }
+        .correct-answer {
+            color: #4CAF50;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>🧮 Word Calculator</h2>
-    <div class="sub">numbers → English words (result only)</div>
+    <h2>🧮 Broken Calculator</h2>
+    <div class="sub">⚠️ DISPLAYS WRONG ANSWERS! ⚠️</div>
 
     <!-- DISPLAY -->
     <div class="display">
@@ -562,7 +611,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- HISTORY -->
     <div class="history-box">
-        <strong>📜 History</strong>
+        <strong>📜 History (WRONG answers!)</strong>
         <?php if (empty($history)): ?>
             <p style="color:#6b7a9f; font-size:14px; margin-top:6px;">No calculations yet</p>
         <?php else: ?>
@@ -582,9 +631,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="mode-note">
-        💡 <span>Result → English words</span>  (operators stay as symbols)
+        💡 <span>ALL ANSWERS ARE WRONG!</span>  (random errors added to each calculation)
     </div>
-    <div class="footer">simple • only result becomes word</div>
+    <div class="warning">🤪 This calculator shows incorrect results on purpose!</div>
+    <div class="footer">broken • wrong answers only</div>
 </div>
 </body>
 </html>
