@@ -1,5 +1,4 @@
 <?php
-// ===== CUSTOM WORD CALCULATOR =====
 
 // Get saved data from cookies
 $memory = isset($_COOKIE['memory']) ? $_COOKIE['memory'] : '';
@@ -11,96 +10,67 @@ $display = '';
 $expression = '';
 $numberResult = '';
 
-// ===== CUSTOM NUMBER TO WORDS MAPPING =====
-// Each number becomes a specific word or phrase!
-function numberToWords($num) {
+// ===== BISAYA CUSTOM WORD MAPPING =====
+$customWords = [
+    0 => 'Zero 😊',
+    1 => 'ako',
+    2 => 'naglagot',
+    3 => 'nimo',
+    4 => 'hangtod sa hangtod',
+    5 => 'ug hangtod',
+    6 => 'kanunay',
+    7 => 'aking',
+    8 => 'walay katapusan',
+    9 => 'gihigugma tika',
+    10 => 'pinangga',
+    11 => 'usa ka gugma',
+    12 => 'tam-is nga damgo',
+    13 => 'malas',
+    14 => 'batan-on hangtod sa hangtod',
+    15 => 'sweet sixteen',
+    16 => 'dili gyud makalimot',
+    17 => 'nindot nga adlaw',
+    18 => 'walay katapusan nga gugma',
+    19 => 'maayong gabii',
+    20 => 'perpekto',
+    21 => 'espesyal',
+    22 => 'katingalahan',
+    23 => 'makalilisang',
+    24 => 'makahihimalat',
+    25 => 'gwapa/gwapo',
+    26 => 'dili katuohan',
+    27 => 'dili mapugngan',
+    28 => 'gamhanan',
+    29 => 'matahum',
+    30 => 'fantastiko',
+    40 => 'kabibo',
+    50 => 'maalamat',
+    60 => 'labing maayo',
+    70 => 'makapahingangha',
+    80 => 'hayag',
+    90 => 'talagsaon',
+    100 => 'perpekto nga napulo',
+    200 => 'doble nga problema',
+    300 => 'triple nga hulga',
+    400 => 'upat ka panahon',
+    500 => 'kalim-an ka landong',
+    1000 => 'libo ka damgo',
+    1000000 => 'milyon nga salamangka'
+];
+
+// ===== FUNCTION: Convert number to Bisaya words =====
+function numberToWords($num, $customWords) {
     // Round to handle decimals
     $num = round($num, 2);
     
-    // Check if it's a whole number or has decimals
-    $isDecimal = ($num != floor($num));
-    $wholePart = floor($num);
-    $decimalPart = round(($num - $wholePart) * 100);
-    
-    // CUSTOM MAPPING: Each number maps to a specific word/phrase
-    $customWords = [
-        0 => 'Zero 😊',
-        1 => 'gcash sa',
-        2 => 'tantan',
-        3 => 'you',
-        4 => 'ambot',
-        5 => 'chawchaw',
-        6 => 'a',
-        7 => 'gamit2 pud ug utok',
-        8 => 'lol',
-        9 => 'gamit2 pud ug utok',
-        10 => 'nag calcu pa ka',
-        11 => 'one love',
-        12 => 'kulot',
-        13 => 'bad luck',
-        14 => 'forever young',
-        15 => 'ngi',
-        16 => 'never forget',
-        17 => 'beautiful day',
-        18 => 'eternal love',
-        19 => 'gamit2 pud ug utok',
-        20 => 'gcash sa',
-        21 => 'special',
-        22 => 'gamit2 pud ug utok',
-        23 => 'wonderful',
-        24 => 'magical',
-        25 => 'ambot',
-        26 => 'incredible',
-        27 => 'unstoppable',
-        28 => 'powerful',
-        29 => 'beautiful',
-        30 => 'fantastic',
-        40 => 'fabulous',
-        50 => 'legendary',
-        60 => 'ambot',
-        70 => 'wow',
-        80 => 'migo',
-        90 => 'phenomenal',
-        100 => 'perfect ten',
-        200 => 'double trouble',
-        300 => 'triple threat',
-        400 => 'four seasons',
-        500 => 'fifty shades',
-        1000 => 'thousand dreams',
-        1000000 => 'calcu pa ka'
-    ];
-    
     // Handle negative numbers
     if ($num < 0) {
-        return 'negative ' . numberToWords(abs($num));
+        return 'negatibo ' . numberToWords(abs($num), $customWords);
     }
     
     // Handle zero
     if ($num == 0) {
         return 'Zero 😊';
-    }
-    
-    // Handle decimal numbers
-    if ($isDecimal) {
-        $whole = numberToWords($wholePart);
-        $decimal = '';
-        
-        // Handle decimal part
-        if ($decimalPart > 0) {
-            $decimal = ' point ';
-            if ($decimalPart < 21) {
-                $decimal .= isset($customWords[$decimalPart]) ? $customWords[$decimalPart] : $decimalPart;
-            } else {
-                $tens = floor($decimalPart / 10) * 10;
-                $ones = $decimalPart % 10;
-                $decimal .= isset($customWords[$tens]) ? $customWords[$tens] : $tens;
-                if ($ones > 0) {
-                    $decimal .= '-' . (isset($customWords[$ones]) ? $customWords[$ones] : $ones);
-                }
-            }
-        }
-        
-        return $whole . $decimal;
     }
     
     // Check if number exists in custom mapping
@@ -135,38 +105,112 @@ function numberToWords($num) {
         $result = '';
         if ($hundreds > 0) {
             $result .= isset($customWords[$hundreds]) ? $customWords[$hundreds] : $hundreds;
-            $result .= ' hundred';
+            $result .= ' ka gatos';
         }
         
         if ($remainder > 0) {
             if ($hundreds > 0) $result .= ' ';
-            $result .= numberToWords($remainder);
+            $result .= numberToWords($remainder, $customWords);
         }
         
         return $result;
     }
     
-    // For bigger numbers, show with custom words
     if ($num < 1000000) {
         $thousands = floor($num / 1000);
         $remainder = $num % 1000;
         
         $result = '';
         if ($thousands > 0) {
-            $result .= numberToWords($thousands);
-            $result .= ' thousand';
+            $result .= numberToWords($thousands, $customWords);
+            $result .= ' ka libo';
         }
         
         if ($remainder > 0) {
             if ($thousands > 0) $result .= ' ';
-            $result .= numberToWords($remainder);
+            $result .= numberToWords($remainder, $customWords);
         }
         
         return $result;
     }
     
-    // Default fallback
     return number_format($num, 0, '.', ',');
+}
+
+// ===== Convert expression to Bisaya words =====
+function calculateStringResult($expr, $customWords) {
+    // Remove spaces
+    $expr = str_replace(' ', '', $expr);
+    
+    // Replace numbers with their custom words
+    $result = '';
+    $currentNumber = '';
+    
+    for ($i = 0; $i < strlen($expr); $i++) {
+        $char = $expr[$i];
+        
+        if (is_numeric($char) || $char == '.') {
+            $currentNumber .= $char;
+        } else {
+            if ($currentNumber !== '') {
+                $num = (float)$currentNumber;
+                if (isset($customWords[$num])) {
+                    $result .= $customWords[$num];
+                } else {
+                    $result .= numberToWords($num, $customWords);
+                }
+                $currentNumber = '';
+            }
+            
+            // Add operator as Bisaya word
+            switch ($char) {
+                case '+':
+                    $result .= ' dugang ';
+                    break;
+                case '-':
+                    $result .= ' minus ';
+                    break;
+                case '*':
+                    $result .= ' ka times ';
+                    break;
+                case '/':
+                    $result .= ' bahin sa ';
+                    break;
+                case '^':
+                    $result .= ' gipataas sa ';
+                    break;
+                case '!':
+                    $result .= ' factorial ';
+                    break;
+                case '√':
+                    $result .= ' square root sa ';
+                    break;
+                case '%':
+                    $result .= ' porsyento ';
+                    break;
+                case '(':
+                    $result .= ' ( ';
+                    break;
+                case ')':
+                    $result .= ' ) ';
+                    break;
+                default:
+                    $result .= $char . ' ';
+                    break;
+            }
+        }
+    }
+    
+    if ($currentNumber !== '') {
+        $num = (float)$currentNumber;
+        if (isset($customWords[$num])) {
+            $result .= $customWords[$num];
+        } else {
+            $result .= numberToWords($num, $customWords);
+        }
+    }
+    
+    return trim($result);
 }
 
 // ===== HANDLE FORM SUBMISSION =====
@@ -188,58 +232,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ===== EQUALS =====
         elseif ($button == '=') {
             if (!empty($expression)) {
-                // Copy expression for calculation
-                $calc = $expression;
+                // Convert expression to Bisaya words
+                $display = calculateStringResult($expression, $customWords);
+                $numberResult = $expression;
                 
-                // Remove spaces
-                $calc = str_replace(' ', '', $calc);
+                // Save to history
+                $history[] = [
+                    'expression' => $expression,
+                    'result' => $display,
+                    'number' => $expression . ' = ' . $display
+                ];
                 
-                // Handle factorial
-                if (preg_match('/(\d+)!/', $calc, $matches)) {
-                    $fact = 1;
-                    for ($i = 1; $i <= $matches[1]; $i++) {
-                        $fact *= $i;
-                    }
-                    $calc = str_replace($matches[0], $fact, $calc);
+                if (count($history) > 10) {
+                    array_shift($history);
                 }
                 
-                // Handle square root
-                $calc = str_replace('√', 'sqrt', $calc);
-                
-                // Handle percentage
-                $calc = str_replace('%', '/100', $calc);
-                
-                // Handle power
-                $calc = str_replace('^', '**', $calc);
-                
-                // Calculate the result
-                try {
-                    $result = eval("return $calc;");
-                    
-                    if (is_numeric($result)) {
-                        $numberResult = $result;
-                        
-                        // Convert to custom words
-                        $display = numberToWords($result);
-                        
-                        // Save to history
-                        $history[] = [
-                            'expression' => $expression,
-                            'result' => $display,
-                            'number' => $result
-                        ];
-                        
-                        // Keep only last 10
-                        if (count($history) > 10) {
-                            array_shift($history);
-                        }
-                        
-                        // Save history cookie
-                        setcookie('history', json_encode($history), time() + 86400 * 30, '/');
-                    }
-                } catch (Exception $e) {
-                    $display = 'Error';
-                }
+                setcookie('history', json_encode($history), time() + 86400 * 30, '/');
             }
         }
         
@@ -249,13 +257,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setcookie('word_mode', $wordMode ? 'on' : 'off', time() + 86400 * 30, '/');
         }
         
-        // ===== MEMORY CLEAR =====
+        // ===== MEMORY FUNCTIONS =====
         elseif ($button == 'MC') {
             $memory = '';
             setcookie('memory', '', time() - 3600, '/');
         }
         
-        // ===== MEMORY RECALL =====
         elseif ($button == 'MR') {
             if ($memory !== '') {
                 $display = $memory;
@@ -263,29 +270,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // ===== MEMORY STORE =====
         elseif ($button == 'MS') {
-            if (is_numeric($display)) {
+            if ($display !== '') {
                 $memory = $display;
                 setcookie('memory', $memory, time() + 86400 * 30, '/');
             }
         }
         
-        // ===== MEMORY ADD =====
         elseif ($button == 'M+') {
-            if ($memory !== '' && is_numeric($display)) {
-                $memory = (float)$memory + (float)$display;
+            if ($memory !== '' && $display !== '') {
+                $memory = $memory . ' + ' . $display;
                 setcookie('memory', $memory, time() + 86400 * 30, '/');
             }
         }
         
-        // ===== CLEAR HISTORY =====
         elseif ($button == 'clear_history') {
             $history = [];
             setcookie('history', '', time() - 3600, '/');
         }
         
-        // ===== ALL OTHER BUTTONS =====
         else {
             $expression .= $button;
         }
@@ -297,7 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Custom Word Calculator</title>
+    <title>Bisaya Word Calculator</title>
     <style>
         * {
             margin: 0;
@@ -306,8 +309,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -326,6 +329,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-top: -15px;
+            margin-bottom: 20px;
         }
         
         .display {
@@ -334,7 +346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            min-height: 120px;
+            min-height: 130px;
             text-align: right;
         }
         
@@ -342,26 +354,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 18px;
             color: #888;
             min-height: 25px;
+            text-align: left;
         }
         
         .display .result {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            color: #f5576c;
+            color: #4CAF50;
             min-height: 60px;
             word-wrap: break-word;
+            text-align: left;
+            line-height: 1.4;
         }
         
         .display .number-display {
             font-size: 14px;
             color: #666;
             min-height: 20px;
+            text-align: left;
         }
         
         .display .memory-label {
             text-align: left;
             font-size: 12px;
-            color: #4CAF50;
+            color: #ff9800;
         }
         
         .buttons {
@@ -384,8 +400,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: scale(1.05);
         }
         
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
         .btn-number {
             background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-number:hover {
+            background: #e0e0e0;
         }
         
         .btn-operator {
@@ -393,10 +418,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
         }
         
+        .btn-operator:hover {
+            background: #5a67d8;
+        }
+        
         .btn-equals {
-            background: #f5576c;
+            background: #4CAF50;
             color: white;
             grid-column: span 2;
+        }
+        
+        .btn-equals:hover {
+            background: #45a049;
         }
         
         .btn-clear {
@@ -404,14 +437,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
         }
         
+        .btn-clear:hover {
+            background: #da190b;
+        }
+        
         .btn-special {
             background: #ff9800;
             color: white;
         }
         
+        .btn-special:hover {
+            background: #e68900;
+        }
+        
         .btn-toggle {
             background: #9c27b0;
             color: white;
+        }
+        
+        .btn-toggle:hover {
+            background: #7b1fa2;
         }
         
         .btn-memory {
@@ -435,6 +480,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 10px;
         }
         
+        .memory-section strong {
+            color: #333;
+        }
+        
         .memory-buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -451,35 +500,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow-y: auto;
         }
         
+        .history strong {
+            color: #333;
+        }
+        
         .history-item {
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
             font-size: 14px;
         }
         
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
         .mode-text {
             text-align: center;
             margin-top: 10px;
             font-size: 12px;
-            color: #666;
+            color: #888;
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
         }
         
-        .custom-word {
-            color: #f5576c;
+        .mode-text span {
+            color: #4CAF50;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>💝 Custom Word Calculator</h2>
+        <h2>💝 Bisaya Calculator</h2>
+        <div class="subtitle">🇵🇭 Numero → Bisaya nga Pulong</div>
         
         <!-- Display -->
         <div class="display">
             <div class="expression"><?php echo htmlspecialchars($expression); ?></div>
-            <div class="number-display"><?php echo $numberResult !== '' ? '# ' . htmlspecialchars($numberResult) : ''; ?></div>
+            <div class="number-display"><?php echo $numberResult !== '' ? '📝 ' . htmlspecialchars($numberResult) : ''; ?></div>
             <div class="result"><?php echo htmlspecialchars($display); ?></div>
             <?php if ($memory !== ''): ?>
-                <div class="memory-label">M = <?php echo htmlspecialchars($memory); ?></div>
+                <div class="memory-label">💾 M = <?php echo htmlspecialchars($memory); ?></div>
             <?php endif; ?>
         </div>
         
@@ -541,30 +603,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- History -->
         <div class="history">
-            <strong>📜 History</strong>
+            <strong>📜 Kasaysayan</strong>
             <?php if (empty($history)): ?>
-                <p style="color:#999; font-size:14px;">No calculations yet</p>
+                <p style="color:#999; font-size:14px;">Wala pay kalkulasyon</p>
             <?php else: ?>
                 <?php foreach (array_reverse($history) as $item): ?>
                     <div class="history-item">
                         <?php echo htmlspecialchars($item['expression']); ?> = 
-                        <span style="color:#f5576c;"><?php echo htmlspecialchars($item['result']); ?></span>
-                        <span style="color:#999; font-size:12px;">(<?php echo $item['number']; ?>)</span>
+                        <span style="color:#4CAF50; font-weight:bold;"><?php echo htmlspecialchars($item['result']); ?></span>
                     </div>
                 <?php endforeach; ?>
                 <form method="POST">
                     <input type="hidden" name="display" value="<?php echo htmlspecialchars($display); ?>">
                     <input type="hidden" name="expression" value="<?php echo htmlspecialchars($expression); ?>">
                     <input type="hidden" name="memory" value="<?php echo htmlspecialchars($memory); ?>">
-                    <button type="submit" class="btn-clear" name="button" value="clear_history" style="padding:8px; font-size:12px; width:100%; border:none; border-radius:5px; cursor:pointer; margin-top:10px;">
-                        Clear History
+                    <button type="submit" class="btn-clear" name="button" value="clear_history" style="padding:8px; font-size:12px; width:100%; border:none; border-radius:5px; cursor:pointer; margin-top:10px; background:#f44336; color:white;">
+                        🗑️ Pagtangtang sa Kasaysayan
                     </button>
                 </form>
             <?php endif; ?>
         </div>
         
         <div class="mode-text">
-            💝 Numbers become custom words! Try 1+2 = "I hate" 😄
+            💡 Ang mga numero mahimong <span>Bisaya nga mga pulong</span>!<br>
+            Sulayi: 1 + 2 = "ako dugang naglagot"
         </div>
     </div>
 </body>
